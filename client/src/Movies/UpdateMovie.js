@@ -1,18 +1,31 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios';
+import {api} from '../utils/api'
 
 export function UpdateMovie(props) {
     const [update, setUpdate] = useState({
-        id: props.match.params.id,
+        id: '',
         title: '',
         director: '',
         metascore: '',
         stars: []
     })
     const [starHandle, setStarHandle] = useState('')
+
+    useEffect(() => {
+        api().get(`movies/${props.match.params.id}`)
+            .then(res => {
+                setUpdate(res.data)
+            })
+            .catch(err => console.log(err))
+
+    }, [props.match.params.id])
+
     return (
         <form onSubmit={(e) => {
             e.preventDefault()
-            console.log(update)
+            api().put(`/movies/${update.id}`, update)
+            props.history.push('/')
         }}>
             <input
                 name='title'
@@ -52,8 +65,8 @@ export function UpdateMovie(props) {
                 setUpdate({...update, stars: [...update.stars, starHandle]})
                 setStarHandle('')
             }}>Add Stars</button>
-            {update.stars.map((item) => {
-                return <p>{item}</p>
+            {update.stars.map((item, index) => {
+                return <p key={index}>{item}</p>
             })}
             <button type='submit'>Update Movie</button>
         </form>
